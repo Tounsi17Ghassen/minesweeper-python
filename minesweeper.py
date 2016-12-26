@@ -96,8 +96,6 @@ class MainWindow(QtGui.QMainWindow):
             self.buttons.append(l)
         
         
-        self.placeMines()
-        self.mineGrid()
         
         self.time = QtCore.QTime(0,0,0)
         self.timer = QtCore.QTimer()
@@ -112,18 +110,22 @@ class MainWindow(QtGui.QMainWindow):
         
     
     def buttonClicked(self):
+        button = self.sender()
+        r = button.row
+        c = button.col
         if self.timerRunning == False:
             self.time.start()
             self.timer.start(100)
             self.timerRunning = True
+            self.placeMines(r,c)
+            self.mineGrid()
+
             
-        button = self.sender()
-        r = button.row
-        c = button.col
         self.revealNearby(r,c)
         return
     
     
+   
     def rightClick(self):
         button = self.sender()
         r = button.row
@@ -262,14 +264,32 @@ class MainWindow(QtGui.QMainWindow):
         return
            
            
-    def placeMines(self):
-        mines = random.sample(range(81),10)
+    def placeMines(self,r,c):
+        t=[]
+        mines=[]
+        for i in range(3):
+            for j in range (3):
+                if(self.isSafe( r+i-1, c+j-1)):
+                    t.append((r+i-1)*9+(c+j-1))
+        for i in range(9):
+            test=True
+            while(test):
+                test=False
+                x=random.randint(0,81)
+                for j in range(0, len(t)):
+                    
+                    if (t[j]==x):
+                        test=True
+                        break
+                if(test==False):
+                    mines.append(x)
         #print mines
         for i in range(9):
             for j in range(9):
                 if i*9+j in mines:
                     self.buttons[i][j].isMine = True
         return
+
 
 
     def mineGrid(self):
