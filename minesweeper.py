@@ -271,7 +271,7 @@ class MainWindow(QtGui.QMainWindow):
             for j in range (3):
                 if(self.isSafe( r+i-1, c+j-1)):
                     t.append((r+i-1)*9+(c+j-1))
-        for i in range(9):
+        for i in range(10):
             test=True
             while(test):
                 test=False
@@ -282,6 +282,7 @@ class MainWindow(QtGui.QMainWindow):
                         test=True
                         break
                 if(test==False):
+                    t.append(x)
                     mines.append(x)
         #print mines
         for i in range(9):
