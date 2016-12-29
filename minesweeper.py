@@ -8,6 +8,7 @@ Created on Sat Jun 25 20:14:39 2016
 import sys
 import random
 from PyQt4 import QtGui,QtCore
+from Tkconstants import BUTT
 
 class MainWindow(QtGui.QMainWindow):
 
@@ -74,6 +75,8 @@ class MainWindow(QtGui.QMainWindow):
     
     def newGame(self):
         self.buttons = []
+        self.rev=0
+        self.msg=False
         for i in xrange(9):
             l=[]
             for j in xrange(9):
@@ -86,6 +89,7 @@ class MainWindow(QtGui.QMainWindow):
                 b.flagged = False
                 b.row = i
                 b.col = j
+                b.neighborsflags=0
                 b.isMine = False
                 b.mineCount = -1
                 b.setFlat(False)
@@ -120,28 +124,43 @@ class MainWindow(QtGui.QMainWindow):
             self.placeMines(r,c)
             self.mineGrid()
 
-            
-        self.revealNearby(r,c)
+        if (button.clicked==True):
+            self.revealNeighbors(r, c)    
+        else:
+            self.revealNearby(r,c)
         return
     
     
    
     def rightClick(self):
-        button = self.sender()
-        r = button.row
-        c = button.col
+       button = self.sender()
+       r = button.row
+       c = button.col
+       if self.buttons[r][c].clicked==False:
         if self.buttons[r][c].flagged==True:
             self.flags = self.flags - 1
             self.buttons[r][c].flagged=False
             txt = ''
             self.buttons[r][c].setText(txt)
             self.buttons[r][c].setStyleSheet('QPushButton {font: bold 20px; color: black}')
+            x = [0, 0,1,1, 1,-1,-1,-1]
+            y = [1,-1,0,1,-1, 0, 1,-1]
+            for z in range(8):
+                if self.isSafe(r+x[z],c+y[z]) and self.buttons[r+x[z]][c+y[z]].flagged == False:
+                    self.buttons[r+x[z]][c+y[z]].neighborsflags-=1
+
         else:
             self.flags = self.flags + 1
             self.buttons[r][c].flagged=True
             txt = '?'
             self.buttons[r][c].setText(txt)
             self.buttons[r][c].setStyleSheet('QPushButton {font: bold 20px; color: black}')
+            x = [0, 0,1,1, 1,-1,-1,-1]
+            y = [1,-1,0,1,-1, 0, 1,-1]
+            for z in range(8):
+                if self.isSafe(r+x[z],c+y[z]) and self.buttons[r+x[z]][c+y[z]].flagged == False:
+                    self.buttons[r+x[z]][c+y[z]].neighborsflags+=1
+
         
         self.flagCnt.setText(str(self.flags) + "/10")
         val = self.isGameOver()
@@ -157,22 +176,42 @@ class MainWindow(QtGui.QMainWindow):
         self.timeLabel.setText( str(round(self.secs,1)) + " Sec" )
         return
         
-        
-    def revealNearby(self, r, c):
+    def revealNeighbors(self, r, c):
         mineCnt = self.buttons[r][c].mineCount
-        if mineCnt != -1:
-            txt = str(mineCnt)
-            self.buttons[r][c].setText(txt)
-            self.buttons[r][c].clicked = True
+        neiCnt = self.buttons[r][c].neighborsflags
+        if (mineCnt==neiCnt):
             self.buttons[r][c].setFlat(True)
             self.buttons[r][c].setEnabled(False)
             self.buttons[r][c].setStyleSheet('QPushButton { background-color: #cccccc; \
                                             border:1px; font: 22px; color: blue}')
-            
+            self.buttons[r][c].setStyleSheet('QPushButton { background-color: #cccccc; \
+                                            border:1px; font: 22px; color: blue}')
+
+            x = [0, 0,1,1, 1,-1,-1,-1]
+            y = [1,-1,0,1,-1, 0, 1,-1]
+            for z in range(8):
+                if self.isSafe(r+x[z],c+y[z]) and self.buttons[r+x[z]][c+y[z]].clicked != True and self.buttons[r+x[z]][c+y[z]].flagged != True:
+                        self.revealNearby(r+x[z],c+y[z]) 
+        return
+
+
+    def revealNearby(self, r, c):
+      if self.buttons[r][c].flagged==False:
+        mineCnt = self.buttons[r][c].mineCount
+        self.rev+=1
+        if mineCnt != -1:
+
+            txt = str(mineCnt)
+            self.buttons[r][c].setText(txt)
+            self.buttons[r][c].clicked = True
+            self.buttons[r][c].setStyleSheet('QPushButton { background-color: #cccccc; \
+                                            border:1px; font: 22px; color: blue}')
             if mineCnt == 0:
                 x = [0, 0,1,1, 1,-1,-1,-1]
                 y = [1,-1,0,1,-1, 0, 1,-1]
-                
+                self.buttons[r][c].setStyleSheet('QPushButton { background-color: #cccccc; \
+                                            border:1px; font: 22px; color: blue}')
+
                 for z in range(8):
                     if self.isSafe(r+x[z],c+y[z]) and self.buttons[r+x[z]][c+y[z]].clicked != True:
                         self.revealNearby(r+x[z],c+y[z]) 
@@ -187,7 +226,13 @@ class MainWindow(QtGui.QMainWindow):
                                             border:1px; font: bold 20px; color: #ff3333}')
             self.timer.stop()                                
             self.gameOver()
-            self.displayMessage('lose')            
+            self.displayMessage('lose')
+
+        if self.rev ==71:
+            self.timer.stop()                                
+            self.gameOver()
+            self.displayMessage('win')
+        
         return
     
     
@@ -220,8 +265,13 @@ class MainWindow(QtGui.QMainWindow):
                     self.buttons[i][j].clicked = True
                     self.buttons[i][j].setFlat(True)
                     self.buttons[i][j].setEnabled(False)
-                    self.buttons[i][j].setStyleSheet('QPushButton { background-color: #cccccc; \
+                    if self.rev ==71:
+                        self.buttons[i][j].setStyleSheet('QPushButton { background-color: #cccccc; \
+                                                    border:1px; font: bold 20px; color: #5cd65c}')
+                    else:
+                        self.buttons[i][j].setStyleSheet('QPushButton { background-color: #cccccc; \
                                                     border:1px; font: bold 20px; color: #ff3333}')
+
                 else:
                     txt = str(mineCnt)
                     self.buttons[i][j].setText(txt)
@@ -234,6 +284,8 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def displayMessage(self, m):
+      if self.msg==False:
+        self.msg=True  
         msgBox = QtGui.QMessageBox();
         f = open('highscore.txt', 'r')
         highScore = float(f.read())
@@ -275,7 +327,7 @@ class MainWindow(QtGui.QMainWindow):
             test=True
             while(test):
                 test=False
-                x=random.randint(0,81)
+                x=random.randint(0,80)
                 for j in range(0, len(t)):
                     
                     if (t[j]==x):
