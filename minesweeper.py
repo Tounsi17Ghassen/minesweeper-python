@@ -8,7 +8,6 @@ Created on Sat Jun 25 20:14:39 2016
 import sys
 import random
 from PyQt4 import QtGui,QtCore
-from Tkconstants import BUTT
 
 class MainWindow(QtGui.QMainWindow):
 
@@ -131,7 +130,6 @@ class MainWindow(QtGui.QMainWindow):
         return
     
     
-   
     def rightClick(self):
        button = self.sender()
        r = button.row
@@ -161,7 +159,6 @@ class MainWindow(QtGui.QMainWindow):
                 if self.isSafe(r+x[z],c+y[z]) and self.buttons[r+x[z]][c+y[z]].flagged == False:
                     self.buttons[r+x[z]][c+y[z]].neighborsflags+=1
 
-        
         self.flagCnt.setText(str(self.flags) + "/10")
         val = self.isGameOver()
         if val == True:
@@ -200,7 +197,6 @@ class MainWindow(QtGui.QMainWindow):
         mineCnt = self.buttons[r][c].mineCount
         self.rev+=1
         if mineCnt != -1:
-
             txt = str(mineCnt)
             self.buttons[r][c].setText(txt)
             self.buttons[r][c].clicked = True
@@ -211,7 +207,6 @@ class MainWindow(QtGui.QMainWindow):
                 y = [1,-1,0,1,-1, 0, 1,-1]
                 self.buttons[r][c].setStyleSheet('QPushButton { background-color: #cccccc; \
                                             border:1px; font: 22px; color: blue}')
-
                 for z in range(8):
                     if self.isSafe(r+x[z],c+y[z]) and self.buttons[r+x[z]][c+y[z]].clicked != True:
                         self.revealNearby(r+x[z],c+y[z]) 
@@ -226,7 +221,7 @@ class MainWindow(QtGui.QMainWindow):
                                             border:1px; font: bold 20px; color: #ff3333}')
             self.timer.stop()                                
             self.gameOver()
-            self.displayMessage('lose')
+            self.displayMessage('lose')            
 
         if self.rev ==71:
             self.timer.stop()                                
@@ -271,7 +266,6 @@ class MainWindow(QtGui.QMainWindow):
                     else:
                         self.buttons[i][j].setStyleSheet('QPushButton { background-color: #cccccc; \
                                                     border:1px; font: bold 20px; color: #ff3333}')
-
                 else:
                     txt = str(mineCnt)
                     self.buttons[i][j].setText(txt)
@@ -328,8 +322,7 @@ class MainWindow(QtGui.QMainWindow):
             while(test):
                 test=False
                 x=random.randint(0,80)
-                for j in range(0, len(t)):
-                    
+                for j in range(0, len(t)):  
                     if (t[j]==x):
                         test=True
                         break
@@ -342,7 +335,6 @@ class MainWindow(QtGui.QMainWindow):
                 if i*9+j in mines:
                     self.buttons[i][j].isMine = True
         return
-
 
 
     def mineGrid(self):
