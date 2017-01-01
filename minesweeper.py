@@ -65,10 +65,16 @@ class MainWindow(QtGui.QMainWindow):
         newAction.setShortcut('Ctrl+N')
         newAction.setStatusTip('Start New Game')
         newAction.triggered.connect(self.newGame)
+        statAction = QtGui.QAction( '&Statistics', self)        
+        statAction.setShortcut('Ctrl+S')
+        statAction.setStatusTip('Show statistics')
+        statAction.triggered.connect(self.getStats)
+        
 
         menubar = self.menuBar()
         optionMenu = menubar.addMenu('&File')
         optionMenu.addAction(newAction)
+        optionMenu.addAction(statAction)
         optionMenu.addAction(exitAction)
     
     
@@ -276,10 +282,41 @@ class MainWindow(QtGui.QMainWindow):
                                                     border:1px; font: 22px; color: blue}')
         return
 
+    def updateStats(self,m):
+        f = open('hist.txt', 'a')
+        if m=='win':
+            f.write('O\n')
+        else:
+            f.write('X\n')
+        
+        f.close()
+        return
+    def getStats(self):
+        w=0
+        l=0
+        f = open('hist.txt', 'r')
+        msgBox = QtGui.QMessageBox();
+        for line in f:
+            print line
+            if line=='O\n':
+                w+=1
+            elif line=='X\n':
+                l+=1
+        f.close()
+        p=w+l
+        txt = 'played : '+str(p)+'\nwon     : '+str(w)+' ('+str(w*100/p)+'%) \nlost      : '+str(l)+' ('+str(l*100/p)+'%)'
+        title = 'statistics'
+        msgBox.setText(txt)
+        msgBox.setWindowTitle(title)
+        msgBox.setIcon(QtGui.QMessageBox.Information)
+        msgBox.setWindowIcon(QtGui.QIcon('minesweeper.ico'))
+        msgBox.exec_()               
 
+        return
     def displayMessage(self, m):
       if self.msg==False:
-        self.msg=True  
+        self.msg=True
+        self.updateStats(m)  
         msgBox = QtGui.QMessageBox();
         f = open('highscore.txt', 'r')
         highScore = float(f.read())
